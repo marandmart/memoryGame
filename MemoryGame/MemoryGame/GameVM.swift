@@ -29,5 +29,11 @@ class GameVM: ObservableObject {
     }
     
     // Mark: - Intent(s)
+    func choose(_ card: Card){
+        modelInstance.choose(card)
+    }
     
+    func newGame(){
+        modelInstance = GameVM.createGame()
+    }
 }

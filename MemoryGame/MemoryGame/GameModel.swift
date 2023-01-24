@@ -8,12 +8,28 @@
 import Foundation
 import SwiftUI
 
-struct GameModel<CardContent> {
+struct GameModel<CardContent> where CardContent: Equatable {
     
     private(set) var cards: Array<Card>
+    
+    private var indexOfAlreadyFaceUpCard: Int?
         
-    mutating func choose(card: Card){
-        
+    mutating func choose(_ card: Card){
+        if let chosenIndex = cards.firstIndex(where: {$0.id == card.id}) {
+            if let possibleMatchIndex = indexOfAlreadyFaceUpCard {
+                if cards[chosenIndex].content == cards[possibleMatchIndex].content {
+                    cards[chosenIndex].isMatched = true
+                    cards[possibleMatchIndex].isMatched = true
+                }
+                indexOfAlreadyFaceUpCard = nil
+            } else {
+                for cardIndex in cards.indices {
+                    cards[cardIndex].isFaceUp = false
+                }
+                indexOfAlreadyFaceUpCard = chosenIndex
+            }
+            cards[chosenIndex].isFaceUp = true
+        }
     }
     
     init(cards: Array<Card>) {
@@ -27,7 +43,6 @@ struct GameModel<CardContent> {
         
         let id: Int
     }
-    
-    
+
     
 }

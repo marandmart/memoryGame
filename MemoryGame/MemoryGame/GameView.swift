@@ -27,7 +27,14 @@ struct GameView: View {
         ScrollView {
             LazyVGrid(columns: columns, alignment: .center) {
                 ForEach(game.cards) { card in
-                    Card(content: card.content)
+                    if !card.isMatched {
+                        Card(content: card.content, showContent: card.isFaceUp)
+                            .onTapGesture {
+                                game.choose(card)
+                            }
+                    } else {
+                        Card(content: card.content, showContent: true)
+                    }
                 }
             }
         }
@@ -38,53 +45,41 @@ struct GameView: View {
         Text("Memory Game")
             .font(.title)
             .fontWeight(.bold)
-            .foregroundColor(Color.blue)
-            .foregroundColor(Color.blue)
+            .foregroundColor(ViewConstants.titleColor)
             .padding(.top)
     }
     
     struct Card: View {
         let content: String
-        let showContent: Bool = true
+        var showContent: Bool
         
         var body: some View {
             let shape: RoundedRectangle = RoundedRectangle(cornerRadius: CardValues.cornerSize)
             ZStack{
                 if showContent {
                     shape
-                        .strokeBorder(CardValues.backsideColor, lineWidth: 5)
+                        .strokeBorder(CardValues.backsideColor, lineWidth: CardValues.cardLinewidth)
                         .aspectRatio(CardValues.aspectRatio, contentMode: .fit)
-                    Text(content)
-                        .font(Font.system(size: CardValues.contentSize))
+                    
                 } else {
                     shape
                         .fill(CardValues.backsideColor)
                         .aspectRatio(CardValues.aspectRatio, contentMode: .fit)
                 }
+                Text(content)
+                    .font(Font.system(size: CardValues.contentSize))
+                    .opacity(showContent ? 1 : 0)
             }
         }
     }
     
     var gameButtons: some View {
         HStack{
-            Button {
-                print("new game button tapped")
-            } label: {
-                Text("New Game")
-                    .fontWeight(.bold)
-            }
-            Spacer()
-            Button {
-                print("reset button tapped")
-            } label: {
-                Text("Reset")
-                    .fontWeight(.bold)
-            }
+            Button("New Game"){
+                game.newGame()
+            }.font(Font.system(size: ViewConstants.newGameButtonSize))
         }
-        .padding(.horizontal)
     }
-    
-    
     
     
     private struct CardValues {
@@ -92,15 +87,15 @@ struct GameView: View {
         static let backsideColor: Color = .red
         static let aspectRatio: CGFloat = 2/3
         static let contentSize: CGFloat = 50
+        static let cardLinewidth: CGFloat = 5
+    }
+    
+    private struct ViewConstants {
+        static let newGameButtonSize: CGFloat = 20
+        static let titleColor: Color = .blue
     }
     
 }
-
-
-
-
-
-
 
 
 
