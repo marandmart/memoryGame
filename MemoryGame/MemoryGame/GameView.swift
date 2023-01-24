@@ -45,7 +45,7 @@ struct GameView: View {
     
     struct Card: View {
         let content: String
-        let showContent: Bool = true
+        let showContent: Bool = false
         
         var body: some View {
             let shape: RoundedRectangle = RoundedRectangle(cornerRadius: CardValues.cornerSize)
@@ -54,13 +54,15 @@ struct GameView: View {
                     shape
                         .strokeBorder(CardValues.backsideColor, lineWidth: 5)
                         .aspectRatio(CardValues.aspectRatio, contentMode: .fit)
-                    Text(content)
-                        .font(Font.system(size: CardValues.contentSize))
+                    
                 } else {
                     shape
                         .fill(CardValues.backsideColor)
                         .aspectRatio(CardValues.aspectRatio, contentMode: .fit)
                 }
+                Text(content)
+                    .font(Font.system(size: CardValues.contentSize))
+                    .opacity(showContent ? 1 : 0)
             }
         }
     }
