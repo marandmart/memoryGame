@@ -12,23 +12,25 @@ struct GameModel<CardContent> where CardContent: Equatable {
     
     private(set) var cards: Array<Card>
     
-    private var indexOfAlreadyFaceUpCard: Int?
+    private var indexOfAlreadyFaceUpCard: Int? {
+        get { cards.indices.filter { cards[$0].isFaceUp }.onlyOne }
+        set { cards.indices.forEach { cards[$0].isFaceUp = ($0 == newValue) } }
+    }
         
     mutating func choose(_ card: Card){
-        if let chosenIndex = cards.firstIndex(where: {$0.id == card.id}) {
+        if let chosenIndex = cards.firstIndex(where: {$0.id == card.id}),
+           !cards[chosenIndex].isMatched,
+           !cards[chosenIndex].isFaceUp
+        {
+            cards[chosenIndex].isFaceUp = true
             if let possibleMatchIndex = indexOfAlreadyFaceUpCard {
                 if cards[chosenIndex].content == cards[possibleMatchIndex].content {
                     cards[chosenIndex].isMatched = true
                     cards[possibleMatchIndex].isMatched = true
                 }
-                indexOfAlreadyFaceUpCard = nil
             } else {
-                for cardIndex in cards.indices {
-                    cards[cardIndex].isFaceUp = false
-                }
                 indexOfAlreadyFaceUpCard = chosenIndex
             }
-            cards[chosenIndex].isFaceUp = true
         }
     }
     
@@ -46,3 +48,11 @@ struct GameModel<CardContent> where CardContent: Equatable {
 
     
 }
+
+extension Array {
+    var onlyOne: Element? {
+        // self implícito
+        count == 1 ? first : nil
+    }
+}
+
