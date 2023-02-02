@@ -22,12 +22,12 @@ struct GameModel<CardContent> where CardContent: Equatable {
            !cards[chosenIndex].isMatched,
            !cards[chosenIndex].isFaceUp
         {
-            cards[chosenIndex].isFaceUp = true
             if let possibleMatchIndex = indexOfAlreadyFaceUpCard {
                 if cards[chosenIndex].content == cards[possibleMatchIndex].content {
                     cards[chosenIndex].isMatched = true
                     cards[possibleMatchIndex].isMatched = true
                 }
+                cards[chosenIndex].isFaceUp = true
             } else {
                 indexOfAlreadyFaceUpCard = chosenIndex
             }
