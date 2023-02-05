@@ -27,14 +27,7 @@ struct GameView: View {
         ScrollView {
             LazyVGrid(columns: columns, alignment: .center) {
                 ForEach(game.cards) { card in
-                    if !card.isMatched {
-                        Card(content: card.content, showContent: card.isFaceUp)
-                            .onTapGesture {
-                                game.choose(card)
-                            }
-                    } else {
-                        Card(content: card.content, showContent: true)
-                    }
+                    cardView(for: card)
                 }
             }
         }
@@ -49,10 +42,22 @@ struct GameView: View {
             .padding(.top)
     }
     
+    @ViewBuilder
+    private func cardView(for card: GameModel<String>.Card) -> some View {
+        if card.isMatched && !card.isFaceUp {
+            Card(content: card.content, showContent: true)
+        } else {
+            Card(content: card.content, showContent: card.isFaceUp)
+                .onTapGesture {
+                    game.choose(card)
+                }
+        }
+    }
+    
     struct Card: View {
         let content: String
         var showContent: Bool
-        
+
         var body: some View {
             let shape: RoundedRectangle = RoundedRectangle(cornerRadius: CardValues.cornerSize)
             ZStack{
@@ -60,7 +65,13 @@ struct GameView: View {
                     shape
                         .strokeBorder(CardValues.backsideColor, lineWidth: CardValues.cardLinewidth)
                         .aspectRatio(CardValues.aspectRatio, contentMode: .fit)
-                    
+                    Pie(
+                        start: 0,
+                        end: 360,
+                        scalingFactor: 0.85
+                    )
+                        .foregroundColor(CardValues.backsideColor)
+
                 } else {
                     shape
                         .fill(CardValues.backsideColor)
