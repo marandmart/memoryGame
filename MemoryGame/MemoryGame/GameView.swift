@@ -42,45 +42,42 @@ struct GameView: View {
             .padding(.top)
     }
     
-    @ViewBuilder
-    private func cardView(for card: GameModel<String>.Card) -> some View {
-        if card.isMatched && !card.isFaceUp {
-            Card(content: card.content, showContent: true)
-        } else {
-            Card(content: card.content, showContent: card.isFaceUp)
-                .onTapGesture {
-                    game.choose(card)
-                }
-        }
-    }
-    
-    struct Card: View {
-        let content: String
-        var showContent: Bool
-
-        var body: some View {
-            let shape: RoundedRectangle = RoundedRectangle(cornerRadius: CardValues.cornerSize)
+    struct Cardify: ViewModifier {
+        let isFaceUp: Bool
+        
+        func body(content: Content) -> some View {
+            let shape = RoundedRectangle(cornerRadius: CardValues.cornerSize)
             ZStack{
-                if showContent {
+                if isFaceUp {
                     shape
-                        .strokeBorder(CardValues.backsideColor, lineWidth: CardValues.cardLinewidth)
+                        .strokeBorder(CardValues.backsideColor, lineWidth: CardValues.cornerSize)
                         .aspectRatio(CardValues.aspectRatio, contentMode: .fit)
-                    Pie(
-                        start: 0,
-                        end: 360,
-                        scalingFactor: 0.85
-                    )
-                        .foregroundColor(CardValues.backsideColor)
-
+                    Pie(start: 0, end: 360, scalingFactor: 0.85)
+                        .foregroundColor(CardValues.pieColor)
+                        .opacity(CardValues.pieColorOpacity)
                 } else {
                     shape
                         .fill(CardValues.backsideColor)
-                        .aspectRatio(CardValues.aspectRatio, contentMode: .fit)
+                        .aspectRatio(CardValues.aspectRatio ,contentMode: .fit)
                 }
-                Text(content)
-                    .font(Font.system(size: CardValues.contentSize))
-                    .opacity(showContent ? 1 : 0)
+                content
+                    .opacity(isFaceUp ? 1 : 0)
             }
+        }
+    }
+    
+    @ViewBuilder
+    private func cardView(for card: GameModel<String>.Card) -> some View {
+        if card.isMatched && !card.isFaceUp {
+            Text(card.content)
+                .cardify(isFaceUp: true)
+        } else {
+            Text(card.content)
+                .font(Font.system(size: CardValues.contentSize))
+                .cardify(isFaceUp: card.isFaceUp)
+                .onTapGesture {
+                    game.choose(card)
+                }
         }
     }
     
@@ -88,7 +85,8 @@ struct GameView: View {
         HStack{
             Button("New Game"){
                 game.newGame()
-            }.font(Font.system(size: ViewConstants.newGameButtonSize))
+            }
+            .font(Font.system(size: ViewConstants.newGameButtonSize))
         }
     }
     
@@ -99,6 +97,11 @@ struct GameView: View {
         static let aspectRatio: CGFloat = 2/3
         static let contentSize: CGFloat = 50
         static let cardLinewidth: CGFloat = 5
+        
+        // pie
+        static let pieColor: Color = .red
+        static let pieColorOpacity: Double = 0.8
+        static let pieScalingFactor: Double = 0.75
     }
     
     private struct ViewConstants {
@@ -108,7 +111,11 @@ struct GameView: View {
     
 }
 
-
+extension View {
+    func cardify(isFaceUp: Bool) -> some View {
+        return self.modifier(GameView.Cardify(isFaceUp: isFaceUp))
+    }
+}
 
 
 struct ContentView_Previews: PreviewProvider {
