@@ -39,46 +39,46 @@ struct GameView: View {
             .font(.title)
             .fontWeight(.bold)
             .foregroundColor(ViewConstants.titleColor)
-            .padding(.top)
     }
     
     struct Cardify: ViewModifier {
         let isFaceUp: Bool
+        let isMatched: Bool
+        
+        func cardIsDown<Content>(_ initialState: Content, cardIsUp finalState: Content) -> Content {
+            isFaceUp || isMatched ? finalState : initialState
+        }
         
         func body(content: Content) -> some View {
             let shape = RoundedRectangle(cornerRadius: CardValues.cornerSize)
             ZStack{
-                if isFaceUp {
-                    shape
-                        .strokeBorder(CardValues.backsideColor, lineWidth: CardValues.cornerSize)
-                        .aspectRatio(CardValues.aspectRatio, contentMode: .fit)
-                    Pie(start: 0, end: 360, scalingFactor: 0.85)
-                        .foregroundColor(CardValues.pieColor)
-                        .opacity(CardValues.pieColorOpacity)
-                } else {
-                    shape
-                        .fill(CardValues.backsideColor)
-                        .aspectRatio(CardValues.aspectRatio ,contentMode: .fit)
-                }
+                shape
+                    .fill(cardIsDown(CardValues.backsideColor, cardIsUp: .white))
+                    .aspectRatio(CardValues.aspectRatio, contentMode: .fit)
+                    .opacity(cardIsDown(1, cardIsUp: 0))
+                shape
+                    .strokeBorder(CardValues.backsideColor, lineWidth: CardValues.cardLinewidth)
+                Pie(start: 0, end: 360, scalingFactor: 0.85)
+                    .foregroundColor(cardIsDown(.clear, cardIsUp: CardValues.pieColor))
+                    .opacity(CardValues.pieColorOpacity)
                 content
-                    .opacity(isFaceUp ? 1 : 0)
+                    .opacity(cardIsDown(0, cardIsUp: 1))
             }
+            .rotation3DEffect(Angle.degrees(isFaceUp && !isMatched ? 0 : 180), axis: (0, 1, 0))
+            .rotationEffect(Angle(degrees: isMatched ? 360 : 0))
+            .animation(.easeInOut(duration: 3), value: isMatched)
+            .animation(.linear, value: isFaceUp)
         }
     }
     
     @ViewBuilder
     private func cardView(for card: GameModel<String>.Card) -> some View {
-        if card.isMatched && !card.isFaceUp {
-            Text(card.content)
-                .cardify(isFaceUp: true)
-        } else {
-            Text(card.content)
-                .font(Font.system(size: CardValues.contentSize))
-                .cardify(isFaceUp: card.isFaceUp)
-                .onTapGesture {
-                    game.choose(card)
-                }
-        }
+        Text(card.content)
+            .font(Font.system(size: CardValues.contentSize))
+            .cardify(isFaceUp: card.isFaceUp, isMatched: card.isMatched)
+            .onTapGesture {
+                game.choose(card)
+            }
     }
     
     var gameButtons: some View {
@@ -112,8 +112,8 @@ struct GameView: View {
 }
 
 extension View {
-    func cardify(isFaceUp: Bool) -> some View {
-        return self.modifier(GameView.Cardify(isFaceUp: isFaceUp))
+    func cardify(isFaceUp: Bool, isMatched: Bool) -> some View {
+        return self.modifier(GameView.Cardify(isFaceUp: isFaceUp, isMatched: isMatched))
     }
 }
 
