@@ -16,7 +16,7 @@ struct GameView: View {
     ]
     
     var body: some View {
-        VStack{
+        VStack(spacing: 0){
             title
             cardScroll
             gameButtons
@@ -24,20 +24,20 @@ struct GameView: View {
     }
     
     var cardScroll: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             LazyVGrid(columns: columns, alignment: .center) {
                 ForEach(game.cards) { card in
                     cardView(for: card)
                 }
             }
+            .padding(.top, 30.0)
         }
-        .padding()
+        .padding(.horizontal)
     }
     
     var title: some View {
         Text("Memory Game")
-            .font(.title)
-            .fontWeight(.bold)
+            .font(Font.system(size: ViewConstants.titleFontSize, weight: ViewConstants.titleFontWeight))
             .foregroundColor(ViewConstants.titleColor)
     }
     
@@ -67,7 +67,7 @@ struct GameView: View {
             .rotation3DEffect(Angle.degrees(isFaceUp && !isMatched ? 0 : 180), axis: (0, 1, 0))
             .rotationEffect(Angle(degrees: isMatched ? 360 : 0))
             .animation(.easeInOut(duration: 3), value: isMatched)
-            .animation(.linear, value: isFaceUp)
+            .animation(.linear(duration: 0.5), value: isFaceUp)
         }
     }
     
@@ -87,6 +87,7 @@ struct GameView: View {
                 game.newGame()
             }
             .font(Font.system(size: ViewConstants.newGameButtonSize))
+            .padding(.top)
         }
     }
     
@@ -107,6 +108,8 @@ struct GameView: View {
     private struct ViewConstants {
         static let newGameButtonSize: CGFloat = 20
         static let titleColor: Color = .blue
+        static let titleFontSize: CGFloat = 32
+        static let titleFontWeight: Font.Weight = .bold
     }
     
 }
