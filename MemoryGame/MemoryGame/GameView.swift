@@ -43,11 +43,13 @@ struct GameView: View {
     
     struct Cardify: AnimatableModifier {
                 
-        init(isFaceUp: Bool){
+        init(isFaceUp: Bool, isMatched: Bool){
             rotation = isFaceUp ? 180 : 0
+            self.isMatched = isMatched
         }
         
         var rotation: Double
+        var isMatched: Bool
         
         var animatableData: Double {
             get { rotation }
@@ -69,24 +71,23 @@ struct GameView: View {
                         .foregroundColor(CardValues.pieColor)
                 }
                 content
+                    .font(Font.system(size: CardValues.contentSize))
                     .opacity(rotation < 90 ? 0 : 1)
             }
             .rotation3DEffect(Angle.degrees(rotation), axis: (0, 1, 0))
+            .rotationEffect(Angle.degrees(isMatched ? 360 : 0))
+            .animation(.easeIn.delay(0.5), value: isMatched)
         }
     }
     
     @ViewBuilder
     private func cardView(for card: GameModel<String>.Card) -> some View {
-        if card.isMatched && !card.isFaceUp{
+        if card.isMatched && !card.isFaceUp {
             Text(card.content)
-                .font(Font.system(size: CardValues.contentSize))
-                .cardify(isFaceUp: true)
+                .cardify(isFaceUp: true, isMatched: true)
         } else {
             Text(card.content)
-                .font(Font.system(size: CardValues.contentSize))
-                .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
-                .animation(.easeIn, value: card.isMatched)
-                .cardify(isFaceUp: card.isFaceUp)
+                .cardify(isFaceUp: card.isFaceUp, isMatched: card.isMatched)
                 .onTapGesture {
                     withAnimation{
                         game.choose(card)
@@ -129,8 +130,8 @@ struct GameView: View {
 }
 
 extension View {
-    func cardify(isFaceUp: Bool) -> some View {
-        return self.modifier(GameView.Cardify(isFaceUp: isFaceUp))
+    func cardify(isFaceUp: Bool, isMatched: Bool) -> some View {
+        return self.modifier(GameView.Cardify(isFaceUp: isFaceUp, isMatched: isMatched))
     }
 }
 
