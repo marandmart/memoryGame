@@ -9,23 +9,54 @@ import SwiftUI
 
 struct GameView: View {
     
-    @ObservedObject var game: GameVM
+    typealias Card = GameModel<String>.Card
     
-    let columns = [
-        GridItem(.adaptive(minimum: 100))
-    ]
+    @ObservedObject var game: GameVM
+    @State private var dealt = Set<Int>()
+    @Namespace private var dealingNamespace
     
     var body: some View {
-        VStack(spacing: 0){
-            title
-            cardScroll
-            gameButtons
+        ZStack(alignment: .bottom){
+            VStack(spacing: 0){
+                ZStack(alignment: .center){
+                    title
+                    HStack() {
+                        if dealt.count != 0 {
+                            Spacer()
+                            restart
+                        }
+                    }
+                }
+                .padding(.horizontal)
+                cardScroll
+            }
+            deckBody
         }
+    }
+    
+    let columns = [
+        GridItem(.adaptive(minimum: 60))
+    ]
+    
+    private func deal(_ card: Card) {
+        dealt.insert(card.id)
+    }
+    
+    private func notDealt(_ card: Card) -> Bool {
+        !dealt.contains(card.id)
+    }
+    
+    private func dealAnimation(for card: Card) -> Animation{
+        var delayLength = 0.0
+        if let index = game.cards.firstIndex(where: {$0.id == card.id}) {
+            delayLength = Double(index) * CardValues.totalAnimationDuration / Double(game.cards.count)
+        }
+        return Animation.easeInOut(duration: CardValues.dealAnimationLength).delay(delayLength)
     }
     
     var cardScroll: some View {
         ScrollView(showsIndicators: false) {
-            LazyVGrid(columns: columns, alignment: .center) {
+            LazyVGrid(columns: columns, alignment: .center, spacing: 10) {
                 ForEach(game.cards) { card in
                     cardView(for: card)
                 }
@@ -41,69 +72,61 @@ struct GameView: View {
             .foregroundColor(ViewConstants.titleColor)
     }
     
-    struct Cardify: AnimatableModifier {
-                
-        init(isFaceUp: Bool, isMatched: Bool){
-            rotation = isFaceUp ? 180 : 0
-            self.isMatched = isMatched
-        }
-        
-        var rotation: Double
-        var isMatched: Bool
-        
-        var animatableData: Double {
-            get { rotation }
-            set { rotation = newValue }
-        }
-        
-        func body(content: Content) -> some View {
-            let shape = RoundedRectangle(cornerRadius: CardValues.cornerSize)
-            ZStack{
-                if rotation < 90 {
-                    shape
-                        .fill(CardValues.backsideColor)
-                        .aspectRatio(CardValues.aspectRatio, contentMode: .fit)
-                } else {
-                    shape
-                        .strokeBorder(CardValues.backsideColor, lineWidth: CardValues.cardLinewidth)
-                        .aspectRatio(CardValues.aspectRatio, contentMode: .fit)
-                    Pie(start: 0, end: 360, scalingFactor: CardValues.pieScalingFactor)
-                        .foregroundColor(CardValues.pieColor)
-                }
-                content
-                    .font(Font.system(size: CardValues.contentSize))
-                    .opacity(rotation < 90 ? 0 : 1)
+    var restart: some View {
+        Button("Restart"){
+            withAnimation {
+                dealt = []
+                game.newGame()
             }
-            .rotation3DEffect(Angle.degrees(rotation), axis: (0, 1, 0))
-            .rotationEffect(Angle.degrees(isMatched ? 360 : 0))
-            .animation(.easeIn.delay(0.5), value: isMatched)
         }
     }
     
+    private func cardIndex(for card: Card) -> Double {
+        -Double(game.cards.firstIndex(where: {$0.id == card.id}) ?? 0)
+    }
+    
     @ViewBuilder
-    private func cardView(for card: GameModel<String>.Card) -> some View {
-        if card.isMatched && !card.isFaceUp {
-            Text(card.content)
-                .cardify(isFaceUp: true, isMatched: true)
+    private func cardView(for card: Card) -> some View {
+        if notDealt(card) || (card.isMatched && !card.isFaceUp) {
+            RoundedRectangle(cornerRadius: CardValues.cornerSize)
+                .fill(Color.clear)
+                .aspectRatio(CardValues.aspectRatio, contentMode: .fit)
         } else {
             Text(card.content)
                 .cardify(isFaceUp: card.isFaceUp, isMatched: card.isMatched)
+                .zIndex(cardIndex(for: card))
+                .matchedGeometryEffect(id: card.id, in: dealingNamespace)
+                .transition(AnyTransition.asymmetric(insertion: .identity, removal: .scale))
                 .onTapGesture {
-                    withAnimation{
+                    withAnimation {
                         game.choose(card)
                     }
                 }
         }
     }
     
-    var gameButtons: some View {
-        HStack{
-            Button("New Game"){
-                game.newGame()
+    var deckBody: some View {
+        ZStack {
+            if dealt.count == 0 {
+                Text("Start").foregroundColor(.white).zIndex(50).transition(AnyTransition.identity)
             }
-            .font(Font.system(size: ViewConstants.newGameButtonSize))
-            .padding(.top)
+            ForEach(game.cards.filter(notDealt)) { card in
+                Text(card.content)
+                    .cardify(isFaceUp: false, isMatched: false)
+                    .zIndex(cardIndex(for: card))
+                    .matchedGeometryEffect(id: card.id, in: dealingNamespace)
+                    .transition(AnyTransition.asymmetric(insertion: .opacity, removal: .identity))
+            }
         }
+        .onTapGesture {
+            for card in game.cards {
+                withAnimation(dealAnimation(for: card)) {
+                    deal(card)
+                }
+            }
+        }
+        .frame(width: CardValues.deckWidth, height: CardValues.deckHeight, alignment: .bottom)
+        .foregroundColor(CardValues.backsideColor)
     }
     
     
@@ -113,26 +136,26 @@ struct GameView: View {
         static let aspectRatio: CGFloat = 2/3
         static let contentSize: CGFloat = 50
         static let cardLinewidth: CGFloat = 5
+        static let dealAnimationLength: Double = 1
+        static let totalAnimationDuration: Double = 4
         
         // pie
         static let pieColor: Color = .red
         static let pieColorOpacity: Double = 0.8
         static let pieScalingFactor: Double = 0.75
+        
+        // deck
+        static let deckWidth: CGFloat = 60
+        static let deckHeight: CGFloat = 90
     }
     
     private struct ViewConstants {
         static let newGameButtonSize: CGFloat = 20
         static let titleColor: Color = .blue
-        static let titleFontSize: CGFloat = 32
+        static let titleFontSize: CGFloat = 24
         static let titleFontWeight: Font.Weight = .bold
     }
     
-}
-
-extension View {
-    func cardify(isFaceUp: Bool, isMatched: Bool) -> some View {
-        return self.modifier(GameView.Cardify(isFaceUp: isFaceUp, isMatched: isMatched))
-    }
 }
 
 
