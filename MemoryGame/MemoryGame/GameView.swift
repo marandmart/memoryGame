@@ -34,38 +34,6 @@ struct GameView: View {
         }
     }
     
-    let columns = [
-        GridItem(.adaptive(minimum: 60))
-    ]
-    
-    private func deal(_ card: Card) {
-        dealt.insert(card.id)
-    }
-    
-    private func notDealt(_ card: Card) -> Bool {
-        !dealt.contains(card.id)
-    }
-    
-    private func dealAnimation(for card: Card) -> Animation{
-        var delayLength = 0.0
-        if let index = game.cards.firstIndex(where: {$0.id == card.id}) {
-            delayLength = Double(index) * CardValues.totalAnimationDuration / Double(game.cards.count)
-        }
-        return Animation.easeInOut(duration: CardValues.dealAnimationLength).delay(delayLength)
-    }
-    
-    var cardScroll: some View {
-        ScrollView(showsIndicators: false) {
-            LazyVGrid(columns: columns, alignment: .center, spacing: 10) {
-                ForEach(game.cards) { card in
-                    cardView(for: card)
-                }
-            }
-            .padding(.top, 30.0)
-        }
-        .padding(.horizontal)
-    }
-    
     var title: some View {
         Text("Memory Game")
             .font(Font.system(size: ViewConstants.titleFontSize, weight: ViewConstants.titleFontWeight))
@@ -79,6 +47,30 @@ struct GameView: View {
                 game.newGame()
             }
         }
+    }
+    
+    let columns = [
+        GridItem(.adaptive(minimum: 60))
+    ]
+    
+    private func deal(_ card: Card) {
+        dealt.insert(card.id)
+    }
+    
+    private func notDealt(_ card: Card) -> Bool {
+        !dealt.contains(card.id)
+    }
+    
+    var cardScroll: some View {
+        ScrollView(showsIndicators: false) {
+            LazyVGrid(columns: columns, alignment: .center, spacing: 10) {
+                ForEach(game.cards) { card in
+                    cardView(for: card)
+                }
+            }
+            .padding(.top, 30.0)
+        }
+        .padding(.horizontal)
     }
     
     private func cardIndex(for card: Card) -> Double {
@@ -103,6 +95,14 @@ struct GameView: View {
                     }
                 }
         }
+    }
+    
+    private func dealAnimation(for card: Card) -> Animation{
+        var delayLength = 0.0
+        if let index = game.cards.firstIndex(where: {$0.id == card.id}) {
+            delayLength = Double(index) * CardValues.totalAnimationDuration / Double(game.cards.count)
+        }
+        return Animation.easeInOut(duration: CardValues.dealAnimationLength).delay(delayLength)
     }
     
     var deckBody: some View {
@@ -137,7 +137,7 @@ struct GameView: View {
         static let contentSize: CGFloat = 50
         static let cardLinewidth: CGFloat = 5
         static let dealAnimationLength: Double = 1
-        static let totalAnimationDuration: Double = 4
+        static let totalAnimationDuration: Double = 3
         
         // pie
         static let pieColor: Color = .red
