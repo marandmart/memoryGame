@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct GameModel<CardContent> where CardContent: Equatable {
-    
+        
     private(set) var cards: Array<Card>
     
     private var indexOfAlreadyFaceUpCard: Int? {
@@ -34,8 +34,15 @@ struct GameModel<CardContent> where CardContent: Equatable {
         }
     }
     
-    init(cards: Array<Card>) {
-        self.cards = cards.shuffled()
+    init(cardIcons: Array<CardContent>){
+        var gameContent: [Card] = Array<Card>()
+        for index in cardIcons.indices {
+            let card1 = Card(content: cardIcons[index], id: index*2)
+            let card2 = Card(content: cardIcons[index], id: index*2+1)
+            gameContent.append(contentsOf: [card1, card2])
+        }
+        gameContent.shuffle()
+        self.cards = gameContent
     }
     
     struct Card: Identifiable {

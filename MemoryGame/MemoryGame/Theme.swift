@@ -9,14 +9,14 @@ import SwiftUI
 
 struct Theme {
     let themeName: String
-    var themeContent: [String]
+    var cardIcons: [String]
     let numberOfPairsOfCards: Int
     let color: Color
     
-    init(themeName: String, themeCards: [String], numberOfPairsOfCards: Int, color: Color) {
+    init(themeName: String, cardIcons: [String], numberOfPairsOfCards: Int, color: Color) {
         self.themeName = themeName
-        self.themeContent = themeCards
-        self.numberOfPairsOfCards = numberOfPairsOfCards > themeCards.count ? themeCards.count : numberOfPairsOfCards
+        self.cardIcons = cardIcons
+        self.numberOfPairsOfCards = numberOfPairsOfCards > cardIcons.count ? cardIcons.count : numberOfPairsOfCards
         self.color = color
     }
     
@@ -25,37 +25,37 @@ struct Theme {
 var gameThemes: Array<Theme> = [
     Theme(
         themeName: "Vehicles",
-        themeCards: ["🚀", "🚁", "🚂", "🚃", "🚅", "🚇", "🚈", "🚕", "🚙", "🚝", "🚑", "⛵️", "🛴", "🛵"],
+        cardIcons: ["🚀", "🚁", "🚂", "🚃", "🚅", "🚇", "🚈", "🚕", "🚙", "🚝", "🚑", "⛵️", "🛴", "🛵"],
         numberOfPairsOfCards: 8,
         color: .green
     ),
     Theme(
         themeName: "Women",
-        themeCards: ["👩🏻‍🔧", "🧗🏽‍♀️", "👩🏿‍🌾", "🏋🏻‍♀️", "🧚🏻‍♀️", "👩🏾‍🚀", "👵🏻", "🏄🏻‍♀️", "👱🏿‍♀️", "👨🏻‍✈️", "🦸🏽‍♀️", "🧏🏻‍♂️", "👯‍♀️"],
+        cardIcons: ["👩🏻‍🔧", "🧗🏽‍♀️", "👩🏿‍🌾", "🏋🏻‍♀️", "🧚🏻‍♀️", "👩🏾‍🚀", "👵🏻", "🏄🏻‍♀️", "👱🏿‍♀️", "👨🏻‍✈️", "🦸🏽‍♀️", "🧏🏻‍♂️", "👯‍♀️"],
         numberOfPairsOfCards: 10,
         color: .pink
     ),
     Theme(
         themeName: "Emotions",
-        themeCards: ["😞", "😔", "😟", "😕", "🙁", "☹️", "😣", "😖", "😫", "😩", "😢", "😭"],
+        cardIcons: ["😞", "😔", "😟", "😕", "🙁", "☹️", "😣", "😖", "😫", "😩", "😢", "😭"],
         numberOfPairsOfCards: 12,
         color: .blue
     ),
     Theme(
         themeName: "Emojis",
-        themeCards: ["😽", "❤️", "😸", "😹", "😺", "😻", "🙀", "😿", "😾", "🐾", "🐱", "🐈", "🐈‍⬛", "🐶", "🌭"],
+        cardIcons: ["😽", "❤️", "😸", "😹", "😺", "😻", "🙀", "😿", "😾", "🐾", "🐱", "🐈", "🐈‍⬛", "🐶", "🌭"],
         numberOfPairsOfCards: 9,
         color: .yellow
     ),
     Theme(
         themeName: "Professions",
-        themeCards: ["👮‍♀️", "🧑‍🌾", "💂", "👩‍🚒", "👨‍🎨", "🧑‍✈️", "👩‍💻", "🧑‍🚀", "🤵‍♂️"],
+        cardIcons: ["👮‍♀️", "🧑‍🌾", "💂", "👩‍🚒", "👨‍🎨", "🧑‍✈️", "👩‍💻", "🧑‍🚀", "🤵‍♂️"],
         numberOfPairsOfCards: 9,
         color: .brown
     ),
     Theme(
         themeName: "Love",
-        themeCards: ["👩‍❤️‍👨", "👩‍❤️‍👩", "💑", "👨‍❤️‍👨", "👩‍❤️‍💋‍👨", "👩‍❤️‍💋‍👩", "💏", "👨‍❤️‍💋‍👨", "👨‍👩‍👦", "👨‍👩‍👧", "👨‍👩‍👧‍👦", "👨‍👩‍👦‍👦"],
+        cardIcons: ["👩‍❤️‍👨", "👩‍❤️‍👩", "💑", "👨‍❤️‍👨", "👩‍❤️‍💋‍👨", "👩‍❤️‍💋‍👩", "💏", "👨‍❤️‍💋‍👨", "👨‍👩‍👦", "👨‍👩‍👧", "👨‍👩‍👧‍👦", "👨‍👩‍👦‍👦"],
         numberOfPairsOfCards: 6,
         color: .red
     )
